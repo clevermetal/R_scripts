@@ -1,0 +1,126 @@
+---
+title: "Week 1 assignmnet"
+output: html_notebook
+---
+
+Question 1
+
+```{r}
+fuel<-read.csv('fuel-frame.csv')
+fuel
+nr<-nrow(fuel)
+nc<-ncol(fuel)
+add1<-fuel[,3]+fuel[,2]
+row3_10<-fuel[3:10,]
+column_names<-colnames(fuel)
+cor1<-cor(fuel$Weight,fuel$Disp.)
+corr_mat<-cor(fuel[,2],fuel[,3])
+corr_mat<- cor(fuel[, -c(1,6)] )
+corr_mat
+cor_min<-min(corr_mat)
+cor_sort<- unique( sort( corr_mat, decreasing=TRUE ) )
+cor_fifth<-cor_sort[5]
+cor_inv<-solve(corr_mat)
+cor_inv
+sqrtl<-sqrt(max(cor_inv))
+ir<-fivenum(fuel$Weight)[4]-fivenum(fuel$Weight)[2]
+mean_fuel_cat <- tapply(fuel$Fuel, fuel$Type, mean)
+med_fuel_cat<-tapply(fuel$Fuel, fuel$Type, median)
+med_fuel_cat
+
+
+plot(fuel$Weight,fuel$Fuel, main = "Plot of Weight vs Fuel", xlab="Weight", ylab = "Fuel")
+fit<-lm(fuel$Fuel ~ fuel$Weight)
+abline(fit$coefficients[1], fit$coefficients[2], col="red", lty=2)
+for (i in 1:nr){
+  xx<- rep(fuel$Weight[i], 2)
+  yy<- c(fuel$Fuel[i], fit$fitted.values[i])
+  if ((abs(fuel$Fuel[i] - fit$fitted.values[i]))==max(residuals(fit))){
+    lines(xx,yy,col="red",lwd=3)
+  }else {
+      lines(xx, yy, col="green")
+    }
+}
+
+max_resid<-which(fit$residuals==max(fit$residuals))
+xx<- rep(fuel$Weight[max_resid], 2)
+?which #Gives the indices for the max
+yy<- c(fuel$Fuel[max_resid], fit$fitted.values[max_resid])
+lines(xx, yy, col="blue", lwd=3)
+
+?legend
+legend("bottomright",  #where to add legend
+       legend=c("fitted line", "Residuals", "Largest residual", "Observed points"), #the legend
+       lty = c(2, 1, 1, NA), #lines types
+       pch = c(NA, NA, NA, 21), #pch types
+       col=c("red", "green", "blue", "black"), #colours used
+       lwd=c(1,1,3, NA), #line width
+       #bty="n" #bounding box for legend - remove it
+       )
+#Residual is the difference between the observed data and the fitted curve
+```
+
+Question 2
+
+```{r}
+mean_fuel<-mean(fuel$Fuel)
+mean_rand5<-sample(fuel$Fuel,60, replace=TRUE, prob=NULL)
+mean_randf<-function(x){
+  vec_length<-length(x)
+  return(mean(sample(x,vec_length,replace = TRUE,prob=NULL)))
+}
+
+fuelValues<-fuel$Fuel
+means<-replicate(50000,(sapply(fxnlist,mean_randf)))
+
+hist(means,prob = T, main="HIstogram of means", xlab = expression(bar(x)))
+
+mean(means)
+var(means)
+mean(fuelValues)
+var(fuelValues) #Why is the variance divided by 60???
+
+```
+Question 3    
+```{r, echo=T}
+fuel<-read.csv("fuel-frame.csv")
+fit_reg<-lm(fuel$Fuel~fuel$Weight)
+pairsfun<-function(x,y){
+  vec_len1<-length(x)
+  vec_len2<-length(y)
+  sample1<-sample(x,vec_len1,replace = T)
+  sample2<-sample(y,vec_len2,replace = T)
+  ransamp<-list(sample1,sample2)
+  return(ransamp)
+}
+randoms<-pairsfun(fuel$Fuel,fuel$Weight)
+testvec1<-randoms[[1]]
+testvec2<-randoms[[2]]
+testvec1
+testvec2
+lm(testvec1~testvec2)
+fit_reg$coefficients
+fit_reg2$coefficients
+
+boot_reg<-function(XY){
+   rows<-sample(1:nrow(XY), replace=T)
+   testlist<-list(XY[rows,2],XY[rows,1])
+   fitnew<-lm(testlist[[1]] ~ testlist[[2]])
+   return(fitnew$coefficients)
+}
+
+#DONT UNDERSTAND THE DIFF??? 
+XY<-cbind(fuel$Weight, fuel$Fuel)
+results<-replicate(100000,boot_reg(XY))
+results2<-replicate(100,boot_reg(XY))
+results2[,]
+par(mfrow=c(2,2), mar=c(3,4,2,1))
+hist(results[1,],probability = T, main="Intercepts histogram plot")
+hist(results[2,],probability = T, main = "Coeffecients")
+
+fit_reg<-lm(fuel$Fuel~fuel$Weight)
+summary(fit_reg)
+
+
+```
+

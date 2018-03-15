@@ -1,0 +1,127 @@
+---
+title: "Revision Notebook 1"
+output: html_notebook
+---
+
+Revsision of class concepts
+
+
+
+```{r}
+nsamp<-1000
+norm_x1 <- rnorm(nsamp)
+norm_x2 <- rnorm(nsamp, mean=0, sd =2)
+norm_x3 <- rnorm(nsamp, mean=0, sd =5)
+norm_x4 <- rnorm(nsamp, mean=0, sd =10)
+par(mfrow=c(2,2), mar=c(3,3,3,5))
+hist(norm_x1)
+hist(norm_x2)
+hist(norm_x3)
+hist(norm_x4)
+```
+
+
+Now let's experiment with a boxplot
+
+```{r}
+norm_samples<-cbind(norm_x1, norm_x2, norm_x3, norm_x4)
+boxplot(norm_samples, col=1:4)
+plot(cars)
+```
+
+Redo coding class problems 
+```{r}
+n_sizes<-seq(from=5, by=15, length.out=2000)
+matrixsizes<-matrix(n_sizes, nrow=length(n_sizes))
+sampleMean<-c(sapply(n_sizes,function(x) mean(rexp(x,5))))
+plot(n_sizes, sampleMean, type="l", main="Means for different no. of samples", col=4)
+abline(a = NULL, b = NULL, h = 0.2, v = NULL, reg = NULL,
+       coef = NULL, untf = FALSE)
+```
+
+
+Now time to generate a histogram with mean values 
+
+```{r}
+meanReplicas1<-replicate(5000, mean(rexp(5,5)))
+par(mfrow=c(2,2), mar=c(3,3,5,5))
+samplesizes<-c(5, 10, 30, 150)
+
+generateReplicas<-function(x, y) {
+  replicate(x, mean(rexp(y,5)))
+}
+
+for (i in 1:4){
+  hist(generateReplicas(5000, samplesizes[i]), prob=TRUE, main = paste("n=",samplesizes[i]))
+}
+```
+
+Experiment with the integral function. NB!! Double check answers dexp vs exp!!!
+
+```{r}
+integrate(function(x) (dexp(x, rate=5,log= FALSE))^2, -Inf, Inf)
+integrate(function(x) (x*dexp(x, rate=5,log= FALSE)), -Inf, Inf)
+testMeans<-(rexp(10000, 5)) 
+mean((rexp(1000, 5) - mean(rexp(1000), 5))^2)
+testing123<-pexp(0.3, rate=5)-pexp(0.1, rate=5)
+testing123
+```
+
+
+Random Sums - My code
+
+```{r}
+sample_S<-function(){
+Nvalue<-sample(1:20, 1)
+testValues<-1
+if (Nvalue ==1){
+  testValues<-1
+}else {
+  for (i in 2:Nvalue){
+  testValues<-c(testValues,abs(rnorm(1,mean=testValues[i-1])))
+  }
+  testValues<-sum(testValues)
+} 
+return(testValues)
+}
+sample_S()
+nsampls<-100000
+S<-replicate(nsampls, sample_S())
+plot(density(S), xlab="S", main="")
+mean(S)
+sd(S)
+1-pnorm(10, mean(S), sd(S))
+```
+
+
+```{r}
+sample_S<-function(x0){
+X<-NULL
+X[1]<-x0 #the first element in the sequence of X
+N<-sample(1:20, size=1)
+if (N==1){
+S<-X[1]
+}else
+{
+for (i in 2:N){ X[i]<- abs(rnorm(1, mean=X[i-1])) }
+S<-sum(X)
+}#endif
+return(S)
+}
+nsamps<-c(seq(from=10, to=15000, by=100))
+length(nsamps)
+converged<-NULL
+for (i in 1:length(nsamps)){
+  converged<-c(converged, mean(replicate(nsamps[i], sample_S(x0=1))))
+}
+length(converged)
+plot(nsamps, converged, type="l")
+#S<-replicate(nsamps, sample_S(x0=1))
+plot(density(S), xlab="S", main="") #produce a density plot!
+mean(S)
+1-(pnorm(10,mean(S),sd(S)))
+```
+
+FINALLY, Distribution of points in a unit square
+
+

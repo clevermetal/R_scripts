@@ -1,0 +1,195 @@
+---
+title: "Week 2 Tutorial"
+output: html_notebook
+---
+
+Question
+
+```{r, echo=T}
+#Question 1.1
+set.seed(1)
+x<-rnorm(50)
+s<-0
+for (j in 1:50){
+  s <- s + x[j] 
+}
+s
+sum(x)
+
+#Question 1.2
+set.seed(1) #set random seed
+
+#create x matrix
+x<-matrix(rnorm(40), nrow=20, ncol=2)
+x
+S<-0
+for (i in 1:20){
+  for (j in 1:2){
+    S<- S + x[i, j] 
+  }#end of j loop
+}#end of i loop
+
+set.seed(1) #set random seed
+
+#Question 1.3 - Calculate the row means of a matrix
+x<-matrix(rnorm(40), nrow=20, ncol=2)
+apply(x, 1, mean)
+
+#Record upper and lower quartile
+
+set.seed(1) #set random seed
+n<-100
+
+#create x matrix
+x<-data.frame(x1=rnorm(n), x2=rnorm(n)*2, x3=runif(n))
+apply(x,2,fivenum)
+test<-c(10,21,32,43)
+test[c(3,4)]
+
+rm(list = ls())
+X<-0
+X[1]<-1
+for (i in 2:100){
+  X<-c(X,X[i-1]+rnorm(1))
+}
+X
+plot(X,type="l")
+
+# Plotting 1D function
+
+xrange<-seq(from=0, to=50, length=1000)
+
+gx<-function(x){sin(x/4)}
+
+par(mfrow=c(1,2))
+plot(xrange, gx(xrange), type="l", ylab="g(x)", xlab="x")
+
+curve(gx, from = 0, to=50, col="red")
+
+#Vectorization
+
+#1.
+x<-1:5
+y<-10:15
+
+z<-x+y
+z
+
+
+#2.
+x<-1:5
+y<-10:14
+seq_along(y)
+?seq_along
+
+z<-c()
+
+for (i in seq_along(x)){
+  z[i]<-x[i] + y[i]
+}
+
+z
+
+#Question 1.7
+rm(list = ls())
+x<-c(2,5,8,10)
+y<-rep(1,10)
+for(i in x){
+  y[i]<-500
+}
+y
+
+x<-c(2,5,8,10)
+y<-rep(1,10)
+
+y[x]<-500
+y
+
+#store the outcome of 1 roll of the die
+roll_outcome<-sample(1:6,1)
+roll_outcome
+
+#initialize game=1
+#measures the number of rolls that occurs
+game<-1
+
+while(roll_outcome>1){
+  #update game counter
+  game<-game+1
+  roll_outcome<-sample(1:6,1)
+  
+  #print output to screen
+  cat("\n game number=", game, "- roll outcome=", roll_outcome, collapse="")
+}
+
+game
+
+#MAximize function
+
+fx<-function(y){
+  -sin(y/10)*exp(-y^2)
+}
+
+curve(fx, -5, 5)
+
+optim(0, fn=fx)
+
+```
+
+Question 2
+
+```{r, echo=T}
+rm(list = ls())
+library(gapminder)
+boxplot(gapminder$lifeExp ~ gapminder$country)
+Africa_data<-gapminder[gapminder$continent=="Africa",]
+Africa_data$country<-Africa_data$country[,drop=TRUE]
+levels(Africa_data$country) #Drop unused levels from a dataframe!!!!
+Africa_data$continent<-Africa_data$continent[,drop=TRUE]
+boxplot(Africa_data$lifeExp~Africa_data$country)
+medianVal<-tapply(Africa_data$lifeExp,Africa_data$country , median)
+fivenum(medianVal)
+
+SouthAf<-which(Africa_data$country=="South Africa")
+SouthAf
+SA_med<-median(Africa_data$lifeExp[SouthAf])
+boxplot(Africa_data$lifeExp~Africa_data$country)
+abline(SA_med,0, lty=2, col="red")
+legend("bottomleft", col="red", lty=2 ,legend = "Median SA Life Expectancy", bty="n")
+plot(Africa_data$year[SouthAf],Africa_data$lifeExp[SouthAf], ylim = c(30, 65))
+
+Africa_data
+```
+
+
+Question 3
+
+```{r}
+require(openxlsx)
+
+qhs<-read.xlsx('QLS2017.xlsx')
+head(qhs)
+colnames(qhs)
+apply(qhs,2,typeof)
+qhs$Q418HRSWRK<-as.numeric(as.character(qhs$Q418HRSWRK))
+class(qhs$Q418HRSWRK)<-"numeric"
+sum(is.na(qhs$Q418HRSWRK))
+par(mfrow=c(1,2), mar=c(2,2,2,2))
+mean(qhs$Q418HRSWRK,na.rm = TRUE)
+median(qhs$Q418HRSWRK,na.rm = TRUE)
+hist(qhs$Q418HRSWRK,probability = T, breaks=30, main="Histogram")
+boxplot(qhs$Q418HRSWRK, main="Boxplot")
+Q418HRSWRK_new<-na.omit(qhs$Q418HRSWRK)
+length(Q418HRSWRK_new)
+meanVals<-replicate(5000, mean(sample(Q418HRSWRK_new,replace = TRUE)))
+hist(meanVals,prob=TRUE,breaks=30,main="Mean Distribution")
+quantile(meanVals,prob=c(0.025,0.975))
+boxplot(qhs$Q418HRSWRK ~ qhs$Province)
+GauRows<-which(qhs$Province=="Gauteng")
+GauHours<-na.omit(qhs$Q418HRSWRK[GauRows])
+GauSample<-sample(GauHours,replace = TRUE)
+meansGau<-replicate(5000, mean(sample(GauHours,replace = TRUE)))
+plot(density(meansGau))
+```
+
+

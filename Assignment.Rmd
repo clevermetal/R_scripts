@@ -1,0 +1,136 @@
+---
+title: "Assignment"
+output: html_notebook
+---
+
+Question 1
+
+R Theory: pnorm calculates the CDF, Dnorm calculates the pdf, qnorm performs lookup with invesrse cdf
+
+dnorm - not very useful unless we are dealing with discrete binomials
+runif is useful to get a random variable between o and 1
+
+NB Density plots - better way to see distribution than historgram!!
+```{r}
+sample_y<-runif(100000)
+inverse<-qexp(sample_y,5)
+hist(inverse, prob=T, main="Histogram", breaks=50)
+lrange<-seq(from=0,to=2,length.out = 1000)
+lines(lrange, dexp(lrange,5), col="red")
+mean(inverse)
+var(inverse)
+1/(5^2)
+?pnorm
+?optimize
+
+?optim
+
+```
+Noiiice!!
+
+Question 2
+
+```{r}
+norm_domain<-seq(from=-5,to=5,length.out=10000)
+x<-dnorm(norm_domain)
+ynew<-runif(10000,0,m)
+xnew<-runif(10000,-5,5)
+par(mfrow=c(2,2), mar=c(3,2,2,2)) 
+keep<-dnorm(xnew)>ynew
+plot(norm_domain, x, type = "l")
+points(xnew[keep],ynew[keep],cex=.3)
+```
+
+Question 3
+
+Sampling from Gamma distribution. We need the max of the density function
+
+```{r}
+
+gam_vec<-seq(-10,20,length.out=10000)
+gammfunc<-dgamma(gam_vec,10,2)
+
+plot(gam_vec,gammfunc, type = "l", col="green")
+#Now we need the max of the density 
+
+hx<-function(x,a,b){
+  (a-1)*log(x)-b*x
+}
+fit<-optim(5,fn=hx,method = "Brent",a=10,b=2,control=list(fnscale=-1),lower=0.0001, upper = 5)
+hx(fit$par,10,2)
+ygam<-runif(10000,-100,hx(fit$par,10,2))
+xgam<-runif(10000,-10,20)
+keep_gam<-hx(xgam,10,2)>ygam
+
+sum(keep_gam, na.rm=TRUE)
+hvalues<-hx(gam_vec,10,2)
+plot(gam_vec,hvalues, type = "l", col="blue", main="Yunishas Graph", xlab="Yuni's, ylab = "Yunis bumz",col="green")
+points(xgam[keep_gam],ygam[keep_gam], cex=0.3)
+plotted
+```
+
+Question 4: Regression
+
+Simulate a straight line with errors.
+
+```{r}
+set.seed(1)
+s<-0.25
+a<--5; b<-1
+x<-runif(50)
+?rnorm
+e<-rnorm(50, sd=s)
+y<-a+b*x+e
+plot(y,x)
+```
+
+
+Remember optmimisation using 2 inputs - use a parameter vector
+```{r}
+l<-function(par, x, y){
+  sum((y - par[1] - par[2]*x)^2)
+}
+
+x2<-runif(500)
+y2<-5+3*(x2)*4*(x2^2)
+y2
+plot(y2,x2)
+?optim
+optim(c(1,1), l, x=x, y=y)
+
+testMatrix = matrix(c(5,5,5,5), nrow = 2, ncol=2)
+rm(list = ls())
+
+#Now a more complex one with squares - what does he want us to do for simulate??
+```
+
+Now back to the question. Using a matrix model - WHAT THE FUCK???
+
+```{r}
+test= rep(1, 100)
+testvalues=runif(100)
+X = cbind(test, testvalues)
+parvec<-matrix(c(-5,1),nrow=2,ncol = 1)
+
+set.seed(1)
+e<-matrix(rnorm(100, sd=0.25),nrow = 100,ncol = 1)
+e
+Y = X%*%parvec
+
+l2vec<-function(parvec, X, Y){
+  (t(Y-X%*%parvec))%*%(Y-X%*%parvec)
+}
+
+optim(c(-1,1), l2vec, X=X, Y=Y)
+
+
+?optim
+```
+Linear regression function
+```{r}
+?lm
+lm(y~x)
+fit_reg<-lm(y~x)
+summary(fit_reg)
+```
+

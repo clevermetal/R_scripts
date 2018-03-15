@@ -1,0 +1,208 @@
+---
+title: "Extra Questions 1 and 2"
+output: html_notebook
+---
+
+
+Question 1 
+```{r}
+#Write a function for f(x), h(x,a), c(x,a)
+xfunct<-function(x){
+  (cos(x/2)^2 + sin(x/10)^2)*x^2*exp(-0.5*x)
+}
+
+h<-function(x,a){
+  return(dexp(x,a))
+}
+
+c<-function(x,a){
+  return(xfunct(x)/h(x,a))
+}
+
+
+#Now plot
+
+x<-seq(from=1, to=100, length.out = 100000)
+Cx1<-c(x,1)
+Cx2<-c(x,0.001)
+plot(x, c(x,0.25), type = 'l', main="C vs X")
+plot(x, Cx2, type = 'l')
+maxC<-max(c(x,0.25))
+xsamp<-rexp(1000, 0.25)
+ysamp<-maxC*dexp(xsamp,0.25)*runif(length(xsamp),0,1)
+plot(xsamp,ysamp)
+keep<-c(xsamp, 0.25)/maxC>ysamp
+plot(xsamp[keep],ysamp[keep])
+prob<-length(xsamp[keep])/length(xsamp)
+var(xsamp[keep])
+
+#The range of a=1 is outside of the f curve values
+
+n<-500000
+#sample from the proposal distribution
+psamples<-rexp(n,rate=0.25)
+#sample from uniform distribution
+u<-runif(n)
+plot(psamples,u)
+#check which samples are accepted
+xaccpt<-ifelse(u<= Cx(psamples, a=0.25)/maxC, psamples,  NA)
+xaccpt<-na.omit(xaccpt)
+
+integx<-function(x){
+  return(x*xfunct(x))
+}
+integx2<-function(x){
+  return(x*x*xfunct(x))
+}
+FxInt<-integrate(xfunct,0,100)
+Ex<-(integrate(integx,0,100))$value/FxInt$value
+Ex
+Ex2<-integrate(integx2,0,100)$value/FxInt$value
+vari<-(Ex2-((Ex)^2))
+vari
+mean(xsamp[keep])
+
+```
+
+
+```{r}
+rm(list = ls())
+fx<-function(x){
+  t1<- cos(x/2)^2
+  t2<-sin(x/10)^2
+  t3<- (x^2)*exp(-x/2)
+  
+  return((t1+t2)*t3)
+}
+hx<-function(x,a){a*exp(-a*x)}
+Cx<-function(x,a){
+  fx(x)/hx(x,a)
+}
+?curve
+
+par(mfrow=c(1,2), mar=c(4,3,1,1))
+curve(Cx(x,a=1), from=0, to=100)
+curve(Cx(x,a=.25), from=0, to=100)
+
+
+```
+
+```{r}
+nsamps<-100000
+u<-runif(nsamps)
+u
+W=function(a,b,u)
+{
+length(u)
+return( b*((-log(u))^(1/a)) )
+}
+x<-W(a=1.5, b=50, u)
+hist(x, xlab="x", main="", prob=T, breaks=50)
+xval<-seq(from=0,to=200, length.out =1000 )
+dfunc<-dweibull(xval,1.5,50,log=FALSE)
+curve(dweibull(x=x,1.5,50), from=0, to=200, add=T, col="red")
+hist(x, xlab="x", main="", prob=T, breaks=50, add=T)
+?hist
+
+```
+
+Now actually calculate the log liklihood value
+```{r}
+testpar<-c(1.5,50)
+xval<-seq(from=1,to=200, length.out =1000)
+#dfunc<-dweibull(xval,1.5,50,log=FALSE)
+dfunc<-rweibull(10000,1.4,50)
+logl<-function(par, x){
+  a<-par[1]
+  b<-par[2]
+  n<-length(x)
+  return(n*log(a/b)+(a-1)*(sum(log(x/b)))-sum((x/b)^a))
+}
+
+fit<-optim(c(1,20), fn=logl, x=dfunc, method = "L-BFGS-B", control = list(fnscale=-1), lower=c(0.001,0.001), upper=c(Inf,Inf))
+
+fit$par
+
+
+```
+
+His stuff
+
+```{r}
+W=function(a,b,nsamps)
+{
+  #W produces a sample from a Weibull random variable with parameters a and b
+  #Note a>0 and b>0
+  #nsamps is the number of samples drawn
+      
+  set.seed(1)
+  u<-runif(nsamps)
+  return( b*((-log(u))^(1/a)) )
+}
+x<-W(a=1.5, b=50, nsamps=1000)
+mean(x)
+
+
+fxq2<-function(x, a, b ){
+  t1<-a/b
+  t2<-x/b
+  return( t1*(t2^(a-1))*exp(-t2^a) )
+}
+hist(x, xlab="x", main="", prob=T, breaks=50)
+curve(fxq2(x, a=1.5, b=50), from=0, to=200, add=T, col="red")
+
+
+logl2<-function(par, x){
+  #the loglikehood of the weibull distribution
+  a<-par[1]
+  b<-par[2]
+  n<-length(x)
+  
+  t1<-x/b
+  t2<-a/b
+  t3<-(a-1)*sum(log(t1))
+  t4<-sum(t1^a)
+  
+  return( n*log(t2) + t3 - t4 )
+}
+
+testpar2<-c(1.5,50)
+#xval2<-seq(from=1,to=200, length.out =1000)
+
+logl2(testpar2,xval2)
+
+
+optim(c(1,20), fn=logl2, x=x, method="L-BFGS-B", control=list(fnscale=-1), lower=c(0.001, 0.001), upper=c(Inf, Inf))
+     # method="L-BFGS-B",
+    #  control=list(fnscale=-1), 
+    #  lower=c(0.001, 0.001),
+     # upper=c(Inf, Inf))
+
+#Write a function that returns A
+
+retA<-function(num){
+  x<-rweibull(num,1.5,50)
+  fit<-optim(c(1,20), fn=logl2, x=x, method="L-BFGS-B", control=list(fnscale=-1), lower=c(0.001, 0.001),upper=c(Inf, Inf))
+  return(fit$par[1])
+}
+
+retB<-function(num){
+  x<-rweibull(num,1.5,50)
+  fit<-optim(c(1,20), fn=logl2, x=x, method="L-BFGS-B", control=list(fnscale=-1), lower=c(0.001, 0.001),upper=c(Inf, Inf))
+  return(fit$par[2])
+}
+
+varA5<-replicate(1000,retA(5))
+varA50<-replicate(1000,retA(50))
+varA100<-replicate(1000,retA(100))
+varA1000<-replicate(1000,retA(1000))
+varB<-replicate(1000,retB())
+
+par(mfrow=c(2,2), mar = c(2,2,2,2))
+hist(varA5,prob=T, breaks = 30)
+hist(varA50,prob=T,breaks =30)
+hist(varA100,prob=T,breaks =30)
+hist(varA1000,prob=T,breaks =30)
+?hist
+```
+

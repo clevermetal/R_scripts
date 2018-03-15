@@ -1,0 +1,85 @@
+---
+title: "Monte Carlo Methods"
+output: html_notebook
+---
+
+Calculate the expected value of the square of the values from normal dist with rate parameter of 5. Use probability density. Ie. Integral of x^2f(x), where X is an exponential distribution with lambda =5.
+
+```{r}
+
+```
+
+
+
+```{r}
+nsamp<-10000 #number samples drawn
+x<-(rexp(nsamp,5))^2 #sample from Exp(rate=5)
+hist(x, prob=TRUE) #plot histogram
+mean(x)
+?rexp
+```
+
+Use integrate command
+
+```{r}
+hx<-function(x){
+  (x^2)*5*exp(-5*x)
+}
+
+integrate (hx, lower=0, upper=Inf)
+```
+
+lambda must be 5
+
+```{r}
+#Loop version
+meanValues<-0
+iValues<-0
+for (i in 1:4999) {
+  meanValues<-c(meanValues, mean(rexp(i, 5)))
+  iValues<-c(iValues, i)
+}
+plot(1:5000, meanValues, type="l")
+
+#Non-loop version
+n_sizes<-seq(from=5, by=15, length.out=500)
+applyMat<-matrix(n_sizes, nrow=length(n_sizes))
+nonLoopMeans<-apply(applyMat,1, function(x) mean(rexp(x,5)))
+nonLoopMeans
+plot(n_sizes, nonLoopMeans, type="l")
+
+```
+
+```{r, echo=true}
+meanValues2<-0
+for (i in 1:5000){
+  x4 <- mean(rexp(5,5))
+  meanValues2<-c(meanValues,x4)
+}
+
+nsize<-c(5,10,50,1000)
+par(mfrow=c(2,2))
+
+for (i in 1:4){
+  means_sample<-replicate(5000, mean(rexp(nsize[i],5)))
+  hist(means_sample, prob = T) 
+}
+```
+
+Assignment questions - Post a long question to do over weekend! Use Monte Carlo Sim 
+
+X1 = 1, X2 = mean of random dist. 
+
+Expected Value = Do something many times - simulate 10000 times, different values then avaerage.
+
+NB Dont confuse the Ns!!!! First N is normal distribution
+
+```{r}
+
+for (i in 1:sample(1:20,1)){
+   Sum<-c(Sum,abs(rnorm(Sum[i])))
+}
+
+Sum
+```
+

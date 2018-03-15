@@ -1,0 +1,61 @@
+---
+title: "Week 3 TUT"
+output: html_notebook
+---
+Q1TUT
+
+Sample Exam Questions PDS
+
+Question 3 (Error in Question)
+
+NB NLM: Non-linear minimization function.
+NB: Read up on log liklihood function - need to know this stats shizz
+
+Maximum liklihood estimators
+
+What dafaaaaq does he do in the start?????? Also, how does the log liklihood function work here? - Need to look at the maths.
+
+Normal way with nlm makes sense
+
+
+```{r}
+days<-c(0,8,28,41,63,79,97,117,135,154)
+beetles<-c(2,47,192,256,768,896,1120,896,1184,1024)
+plot(days,beetles,type="l",main="Beetles over time",xlab = "Days",ylab = "Beetles no.",col="red") #Population is growing
+#Always remember that the values you want to min/max put in par vector
+?nlm
+error_ft<-function(param, x0, days, beetles){
+  Num<-param[1]*x0
+  Den<-x0+(param[1]-x0)*exp(-param[2]*days)
+  Error_vec<-beetles-(Num/Den)
+  return(sum(Error_vec^2))
+}
+
+#Note that p is the starting guesses for r and K
+fitmin<-nlm(error_ft, p=c(1000,2), x0=2, days=days, beetles=beetles)
+#Now we want to actually test the fitted values
+Kval<-fitmin$estimate[1]
+Rval<-fitmin$estimate[2]
+days_seq<-seq(from=0,to=150, length.out = 500)
+fitted<-(Kval*2)/(2+(Kval-2)*exp(-Rval*days_seq))
+plot(days,beetles,main="Beetles over time",xlab = "Days",ylab = "Beetles no.",col="black")
+lines(days_seq,fitted,lty=2, col="blue")
+legend("bottomright",legend = "logistic fitted values", lty=2,col="red",bty="n")
+ \(N_t \sim N( f_t, \sigma^2)\)
+#I understand this way! Need to understand log liklihood function
+```
+It doesnt matter if we assume \(N_t \sim N( f_t, \sigma^2)\) because maximizing the log of the functions still obtains the same values.
+
+4. Bootstrap sampling for \(\hat{s}^2\). We need to find the distribution for this. Note if you use optim and substitute fro all values, it will convergfe for s^2 ie. the error deviation.
+
+Let's give it a bash
+
+```{r}
+?nlm
+?optim
+```
+
+
+
+
+

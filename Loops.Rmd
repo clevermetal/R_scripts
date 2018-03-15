@@ -1,0 +1,71 @@
+---
+title: "Loops Notebook"
+output: html_notebook
+---
+The following segment runs a loop to calculate the weekly revenue
+
+```{r, echo = TRUE}
+setwd('/Users/Prinpillay/R_scripts')
+filename<-paste("doughnuts.csv", sep="")
+dn<-read.csv(filename, header=TRUE)
+sumtotal<-matrix(0,nrow=100, ncol=1)
+names(dn)
+for (i in 1:100)
+{
+  for (j in 1:5)
+  {
+    sumtotal[i]<-sumtotal[i] + dn[i,j]
+  }
+}
+sumtotal
+```
+
+Another way to do this is using the apply function. Rather use apply and avoid loops.
+
+```{r, echo=TRUE}
+apply(dn, 1, sum)
+apply(dn, 2, sum)
+```
+
+Lists
+Matrices must by default have 2 dimensions. However, arrays can be 3 dimensional. If you use a function, you need to use a list if you want to return multiple things
+
+```{r,}
+list1<-list(NULL)
+list1[[1]]<-matrix(1:4, ncol=2)
+list1[[2]]<-matrix(1:9, ncol=3)
+lapply(list1, mean)
+apply(list1[[1]],1, mean)
+list
+for (i in 1:2)
+{
+  test<-apply(list1[[i]],1, mean)
+  test
+}
+lapply(list1, function(x) apply(x,1,mean))
+
+```
+NB Read up on function(x), lapply linking to apply!! better way than using loops
+Apply = matrix
+Sapply - evaluates for a vector 
+Lapply for lists
+```{r}
+y<-1:5
+fx<-function(x){ x+1 }
+sapply(y, FUN=fx)
+```
+
+Rnorm - normal distribution - generator
+
+```{r}
+replicate(4, rnorm(3))
+```
+
+
+
+
+
+
+
+
+
